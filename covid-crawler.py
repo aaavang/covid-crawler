@@ -5,7 +5,6 @@ from geopy import distance
 from geopy.geocoders import Nominatim
 import pandas as pd
 import webbrowser as wb
-import time
 import tkinter as tk
 
 geolocator = Nominatim(user_agent="covid-crawler")
@@ -50,7 +49,7 @@ us_state_abbrev = {
     'New York': 'NY',
     'North Carolina': 'NC',
     'North Dakota': 'ND',
-    'Northern Mariana Islands':'MP',
+    'Northern Mariana Islands': 'MP',
     'Ohio': 'OH',
     'Oklahoma': 'OK',
     'Oregon': 'OR',
@@ -169,7 +168,7 @@ tk.Label(master, text="Max Travel Distance (miles)").grid(row=1)
 tk.Label(master, text="Polling Interval (seconds)").grid(row=2)
 
 address_entry = tk.Entry(master)
-address_entry.insert(0, "2095 Dudley Ave Saint Paul MN")
+address_entry.insert(0, "")
 distance_entry = tk.Entry(master)
 distance_entry.insert(0, "150")
 polling_interval_entry = tk.Entry(master)
