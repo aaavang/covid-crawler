@@ -129,8 +129,11 @@ def search():
                 staleness = round(pd.Timedelta(now - scan_date).seconds / 60.0, 2)
 
                 if location['distance'] < float(distance_entry.get()):
-                    print(f"Found vaccine appointment: {location_name}, {location_address}, distance: {location['distance']} miles, staleness: {staleness} mins")
-                    data.append([location_name, location_address, location['properties']['url'], location['distance'], staleness])
+                    print(f"Found vaccine appointment: {location_name}, {location_address}, vaccine types: {list(location['properties']['appointment_vaccine_types'].keys())}, distance: {location['distance']} miles, staleness: {staleness} mins")
+
+                    if((pfizer_checkbox_var.get() == 1 and location['properties']['appointment_vaccine_types'].get('pfizer', False))
+                    or ((moderna_checkbox_var.get() == 1 and location['properties']['appointment_vaccine_types'].get('moderna', False)))):
+                        data.append([location_name, location_address, list(location['properties']['appointment_vaccine_types'].keys()), location['distance'], staleness])
                 else:
                     ignored_locations.append(location)
 
@@ -160,7 +163,7 @@ def search():
 
 
 master = tk.Tk()
-master.geometry("700x400")
+master.geometry("700x500")
 master.title('Covid Crawler')
 master.resizable(height=None, width=None)
 tk.Label(master, text="Address or Coordinates").grid(row=0)
@@ -174,31 +177,42 @@ distance_entry.insert(0, "150")
 polling_interval_entry = tk.Entry(master)
 polling_interval_entry.insert(0, "10")
 
+type_frame = tk.Frame(master)
+
+moderna_checkbox_var = tk.IntVar(value=1)
+pfizer_checkbox_var = tk.IntVar(value=1)
+
+moderna_checkbox = tk.Checkbutton(master, text="Moderna", variable=moderna_checkbox_var)
+pfizer_checkbox = tk.Checkbutton(master, text="Pfizer", variable=pfizer_checkbox_var)
+
 address_entry.grid(row=0, column=1, sticky='nswe')
 distance_entry.grid(row=1, column=1, sticky='nswe')
 polling_interval_entry.grid(row=2, column=1, sticky='nswe')
 
+moderna_checkbox.grid(row=3, column=0)
+pfizer_checkbox.grid(row=3, column=1)
+
 tk.Button(master,
           text='Quit',
-          command=master.quit).grid(row=3,
+          command=master.quit).grid(row=4,
                                     column=0,
                                     sticky='nswe',
                                     pady=4)
 
 search_button = tk.Button(master, text='Start Search', command=start_search)
-search_button.grid(row=3, column=1, sticky='nswe', pady=4)
+search_button.grid(row=4, column=1, sticky='nswe', pady=4)
 
-tk.Label(master, text="Click any cell to open URL").grid(row=5, column=0)
+tk.Label(master, text="Click any cell to open URL").grid(row=6, column=0)
 ignored_label_text = tk.StringVar()
 ignored_label = tk.Label(master, textvariable=ignored_label_text)
-ignored_label.grid(row=5, column=1)
-tk.Label(master, text="").grid(row=6, column=0)
+ignored_label.grid(row=6, column=1)
+tk.Label(master, text="").grid(row=7, column=0)
 
 sheet = Sheet(master,
-              headers=['Name', 'Address', 'URL', 'Distance', 'Staleness'])
-sheet.enable_bindings(("single_select",))
+              headers=['Name', 'Address', 'Vaccine Types', 'Distance (miles)', 'Staleness (mins)'])
+sheet.enable_bindings()
 sheet.extra_bindings('cell_select', func=cell_selected)
-sheet.grid(row=7, column=0, columnspan=2, sticky='nswe')
+sheet.grid(row=8, column=0, columnspan=2, sticky='nswe')
 for x in range(2):
     tk.Grid.columnconfigure(master, x, weight=1)
 
