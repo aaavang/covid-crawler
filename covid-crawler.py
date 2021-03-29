@@ -6,6 +6,7 @@ from geopy.geocoders import Nominatim
 import pandas as pd
 import webbrowser as wb
 import tkinter as tk
+import platform
 
 geolocator = Nominatim(user_agent="covid-crawler")
 searching = True
@@ -75,7 +76,11 @@ def cell_selected(event=None):
     r, c = sheet.get_currently_selected()
 
     url = sheet.get_cell_data(r, 2)
-    wb.get('windows-default').open(url)
+
+    if platform.system() == 'Windows':
+        wb.get('windows-default').open(url)
+    else:
+        wb.get('macosx').open(url)
 
 
 def start_search():
@@ -133,7 +138,7 @@ def search():
 
                     if((pfizer_checkbox_var.get() == 1 and location['properties']['appointment_vaccine_types'].get('pfizer', False))
                     or ((moderna_checkbox_var.get() == 1 and location['properties']['appointment_vaccine_types'].get('moderna', False)))):
-                        data.append([location_name, location_address, list(location['properties']['appointment_vaccine_types'].keys()), location['distance'], staleness])
+                        data.append([location_name, location_address, location['properties']['url'], list(location['properties']['appointment_vaccine_types'].keys()), location['distance'], staleness])
                 else:
                     ignored_locations.append(location)
 
@@ -209,7 +214,7 @@ ignored_label.grid(row=6, column=1)
 tk.Label(master, text="").grid(row=7, column=0)
 
 sheet = Sheet(master,
-              headers=['Name', 'Address', 'Vaccine Types', 'Distance (miles)', 'Staleness (mins)'])
+              headers=['Name', 'Address', 'URL', 'Vaccine Types', 'Distance (miles)', 'Staleness (mins)'])
 sheet.enable_bindings()
 sheet.extra_bindings('cell_select', func=cell_selected)
 sheet.grid(row=8, column=0, columnspan=2, sticky='nswe')
